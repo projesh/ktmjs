@@ -2,80 +2,94 @@
 <html>
   <head>
     <title>Admin | KtmJS</title>
+    <link href='https://fonts.googleapis.com/css?family=Lato:400,300,700,900' rel='stylesheet' type='text/css'/>
+  <link rel="stylesheet" href="/admin/css/index.css" type="text/css"/>
     <link rel="stylesheet" href="/admin/css/admin.css" type="text/css"/>
   </head>
 
   <body>
-    <div class="Panel__Navigation">
       <img class="logo" src="/admin/images/logo.png" alt="Kathmandu JS User Group Logo" />
+    <nav class="Panel__Navigation">
+        <a href="/meetups">Episodes</a>
+      <a href="/people">People</a>
+      <a href="/companies">Organizations</a>
       <ul class="Navigation">
-        <li><a href="/">Meetups</a></li>
-        <li><a href="/companies">Companies</a></li>
-        <li><a href="/people">People</a></li>
       </ul>
-    </div>
+    </nav>
 
-    <div class="Panel__Timeline">
-      <form action="/update/{{_id}}" method="post">
-        <input type="text" placeholder="episode" name="episode" value={{episode}} />
-        <input type="date" placeholder="date" name="date" value={{date}} />
-        <h5>Starting time</h5>
-        <input type="time" placeholder="starting time" name="startsAt" value={{startsAt}} />
-        <h5>Ending time</h5>
-        <input type="time" placeholder="ending time" name="endsAt" value={{endsAt}} />
+    <!-- <div class="Panel__Timeline"> -->
+    <div class="Panel__Form">
+      <form action="/update/{{_id}}" class="Form" name="meetup-update-form" method="post">
 
-        <h4>Venue</h4>
-        <input type="text" placeholder="Organisation" name="venue[organisation]" value={{venue.organisation}} />
-        <input type="text" placeholder="Address Line 1" name="venue[addr_line1]" value={{venue.addr_line1}} />
-        <input type="text" placeholder="Address Line 2" name="venue[addr_line2]" value={{venue.addr_line2}} />
+      <label for="episode" class="Form__Label">episode</label>
+        <input type="text" placeholder="episode" class="Form__TextInput" value={{episode}} readonly="readonly" />
+        
+      <label for="episode" class="Form__Label">date</label>
+        <input type="date" placeholder="date" name="date" class="Form__TextInput" value={{date}} />
 
-        <h4>Sessions</h4>
+        <label for="time" class="Form__Label">Session Start Time</label>
+        <input type="time" placeholder="starting time" name="startsAt" class="Form__TextInput" value={{startsAt}} />
+
+        <label for="time" class="Form__Label">Ending time</label>
+        <input type="time" placeholder="ending time" name="endsAt" class="Form__TextInput" value={{endsAt}} />
+
+
+         <h2 class="Form__Subtitle">Venue Details</h2>
+         <label for="venue" class="Form__Label">Organization Name</label>
+        <input type="text" placeholder="Organisation" name="venue[organisation]" class="Form__TextInput" value={{venue.organisation}} />
+        <label for="address_1" class="Form__Label">Organization Address 1</label>
+        <input type="text" placeholder="Address Line 1" name="venue[addr_line1]" class="Form__TextInput" value={{venue.addr_line1}} />
+        <label for="address_2" class="Form__Label">Organization Address 2</label>
+        <input type="text" placeholder="Address Line 2" name="venue[addr_line2]" class="Form__TextInput" value={{venue.addr_line2}} />
+
+        <h2 class="Form__Subtitle">Sessions Details</h2>
         <div id="sessions">
-          {{#each sessions}}
-          <input type="text" placeholder="title" value={{title}}>
-          <input type="time" placeholder="time"  value={{time}}>
-          <input type="text" placeholder="desc"  value={{desc}}>
+          {{#each session}}
+          <h4>{{title}}</h4>
+          <div style="display:">
+            
+          <label for="title" class="Form__Label">Title</label>
+          <input type="text" placeholder="title" class="Form__TextInput" value='{{title}}'>
+          <label for="time" class="Form__Label">Session Start Time</label>
+          <input type="time" placeholder="time" class="Form__TextInput" value={{time}}>
+          <!-- <input type="text" placeholder="desc" class="Form__TextInput" value={{description}}> -->
+          <label for="description" class="Form__Label">Description</label>
+          <textarea class="Form__TextArea">
+            {{description}}
+          </textarea>
+          <label for="speakers" class="Form__Label">Speaker</label>
+          <input type="text" id="speakers" name="session[0][speakers]" class="Form__TextInput"/>
+          <hr style='border:2px green solid; margin:0 0 50px'>
+          </div>
           {{~/each}}
 
-          <input type="text" placeholder="title">
-          <input type="text" placeholder="time">
-          <input type="text" placeholder="desc">
-          {{{dropdown "people"}}}
+        </div>
           <button onclick="return addPeople(event);">Add People</button>
-        </div>
-        <button onclick="return addSession(event);">Add Session</button>
+        <button type="button" onclick="return addSession(event);" class="Button Button--Neutral">+ Add another session</button>
 
-        <h4>Sponsors</h4>
-        <div id="sponsors">
-          {{{dropdown "companies"}}}
-        </div>
-        <button onclick="return addSponsors(event);">Add Sponsors</button>
-
-        <h4>Supporters</h4>
-        <div id="supporters">
-          {{{dropdown "companies"}}}
-        </div>
-        <button onclick="return addSupporters(event);">Add Supporters</button>
-
-        <input type="submit" value="Update" />
+       
       </form>
 
       <script>
+      // debugger;
         window.Index = {
-          Session: {{sessions.length}},
+          Session: {{session.length}},
           People: 0,
           Sponsor: 0,
           Supporter: 0
         };
 
-        function getNode(name, type, placeholder, val) {
+      function getNode(name, type, placeholder, val) {
           var input = document.createElement('input');
           input.name = name;
           input.type = type;
           input.placeholder = placeholder;
           input.value = val ? val : null;
+          input.classList.add('Form__TextInput');
           return input;
         }
+
+        fimctop
 
         function addSession(e) {
           e.stopPropagation();
@@ -83,9 +97,10 @@
 
           var sessionsElm = document.getElementById('sessions');
           console.log('hey what', sessionsElm);
-          sessions.appendChild(getNode("sessions[" + window.Index.Session + "][title]", "hidden", "title", sessionsElm.children[0].value));
-          sessions.appendChild(getNode("sessions[" + window.Index.Session + "][time]", "hidden", "time", sessionsElm.children[1].value));
-          sessions.appendChild(getNode("sessions[" + window.Index.Session + "][desc]", "hidden", "desc", sessionsElm.children[2].value));
+          //sessions.appendChild('<label for="title" class="Form__Label">Title</label>');
+          sessions.appendChild(getNode("sessions[" + window.Index.Session + "][title]", "", "title", sessionsElm.children[0].value));
+          sessions.appendChild(getNode("sessions[" + window.Index.Session + "][time]", "", "time", sessionsElm.children[1].value));
+          sessions.appendChild(getNode("sessions[" + window.Index.Session + "][desc]", "", "desc", sessionsElm.children[2].value));
 
           ++window.Index.Session;
 
@@ -124,6 +139,7 @@
 
           ++window.Index.People;
         }
+
       </script>
   </body>
 </html>
